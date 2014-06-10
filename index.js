@@ -10,8 +10,11 @@ var elements;
 
 /**
  * This module serves user database element
+ * @todo implement dynamic user authentication registration.
  * @constructor
  */
+
+
 var user = function() {
   var self = this;
 
@@ -128,6 +131,7 @@ user.prototype.initApplication = function(app) {
     // persistent login sessions (recommended).
     app.use(passport.initialize());
 
+    app.use('/login/jwt', self.debugHeader);
     //app.use(passport.session());
     //@todo replace with app.post('/login/jwt',  passport.authenticate('local', { session: false }), function (req, res)
     //app.post('/login/jwt', function (req, res) {
@@ -142,6 +146,12 @@ user.prototype.initApplication = function(app) {
       res.json({name: user.name, _id: user._id, username: user.username, email: user.email, token: token });
     });
   }
+};
+
+user.prototype.debugHeader = function debugHeader(req, res, next) {
+  console.log(req.headers);
+  console.log(req.body);
+  next();
 };
 
 /**
@@ -377,6 +387,11 @@ user.prototype.checkPermission = function checkPermission(item, req, res, next) 
     }
   });
 };
+
+/*
+ user.prototype.getUserById = function getUserById(id) {
+
+ };*/
 
 var init = function (m) {
   // store molecuel instance
