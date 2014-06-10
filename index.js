@@ -176,15 +176,15 @@ user.prototype._defaultSchemaPlugin = function _defaultSchemaPlugin(schema) {
  * @param schema
  */
 user.prototype._registerDefaultschemaFunctions = function(schema) {
-  schema.path('passwordConfirmation').set(function (passwordConfirmation) {
-    if (this.password && passwordConfirmation) {
+  schema.pre('validate', function(next) {
+    if (this.password && this.passwordConfirmation) {
       var invalid = false;
       if (! elements.validator.isLength(this.password, 6)) {
         this.invalidate('password', 'must be at least 6 characters.');
         invalid = true;
       }
 
-      if (this.password !== passwordConfirmation) {
+      if (this.password !== this.passwordConfirmation) {
         this.invalidate('passwordConfirmation', 'must match confirmation.');
         invalid = true;
       }
@@ -194,8 +194,7 @@ user.prototype._registerDefaultschemaFunctions = function(schema) {
         this.hash = bcrypt.hashSync(this.password, this.salt);
       }
     }
-
-    return passwordConfirmation;
+    next();
   });
 
   schema.pre('save', function(next) {
