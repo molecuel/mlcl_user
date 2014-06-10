@@ -73,7 +73,7 @@ var user = function() {
   molecuel.once('mlcl::elements::registrations:pre', function(module) {
     elements = module;
     // module == elements module
-    elements.registerSchemaDefinition('user', self.userSchema, {indexable: true, avoidTranslate: true});
+    elements.registerSchemaDefinition('user', self.userSchema, {indexable: true, avoidTranslate: true, avoidUrl: true});
   });
 
   // on elements registration of user schema
