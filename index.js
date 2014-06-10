@@ -10,11 +10,8 @@ var elements;
 
 /**
  * This module serves user database element
- * @todo implement dynamic user authentication registration.
  * @constructor
  */
-
-
 var user = function() {
   var self = this;
 
@@ -170,25 +167,33 @@ user.prototype._defaultSchemaPlugin = function _defaultSchemaPlugin(schema) {
  * @param schema
  */
 user.prototype._registerDefaultschemaFunctions = function(schema) {
-  schema.path('password').validate(function () {
-    if (this.password || this.passwordConfirmation) {
+  schema.path('passwordConfirmation').set(function (passwordConfirmation) {
+    if (this.password && passwordConfirmation) {
       var invalid = false;
       if (! elements.validator.isLength(this.password, 6)) {
         this.invalidate('password', 'must be at least 6 characters.');
         invalid = true;
       }
-      if (this.password !== this.passwordConfirmation) {
+
+      if (this.password !== passwordConfirmation) {
         this.invalidate('passwordConfirmation', 'must match confirmation.');
         invalid = true;
       }
+
       if(!invalid) {
         this.salt = bcrypt.genSaltSync(10);
         this.hash = bcrypt.hashSync(this.password, this.salt);
       }
     }
+
+    return passwordConfirmation;
+  });
+
+  schema.pre('save', function(next) {
     this.password = undefined;
     this.passwordConfirmation = undefined;
-  }, null);
+    next();
+  });
 
   schema.method('checkPassword', function (password, callback) {
     if(this.hash) {
@@ -372,11 +377,6 @@ user.prototype.checkPermission = function checkPermission(item, req, res, next) 
     }
   });
 };
-
-/*
-user.prototype.getUserById = function getUserById(id) {
-
-};*/
 
 var init = function (m) {
   // store molecuel instance
