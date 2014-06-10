@@ -131,7 +131,6 @@ user.prototype.initApplication = function(app) {
     // persistent login sessions (recommended).
     app.use(passport.initialize());
 
-    app.use('/login/jwt', self.debugHeader);
     //app.use(passport.session());
     //@todo replace with app.post('/login/jwt',  passport.authenticate('local', { session: false }), function (req, res)
     //app.post('/login/jwt', function (req, res) {
