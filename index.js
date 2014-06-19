@@ -87,7 +87,7 @@ var user = function() {
   // on elements registration of user schema
   molecuel.on('mlcl::elements::registerSchema:post::user', function(module, schemaRegistryEntry) {
     self.schema = schemaRegistryEntry.schema;
-    //module.addToBaseSchema({createdby: {type: elements.ObjectId, ref: 'user', form:{select2:{fngAjax:true}}}});
+    //module.addToBaseSchema({createdby: {type: elements.ObjectId, ref: 'user', form:{hidden:true}}});
     self.schema.plugin(self._registerDefaultschemaFunctions);
   });
 
@@ -169,10 +169,14 @@ user.prototype.debugHeader = function debugHeader(req, res, next) {
 user.prototype._defaultSchemaPlugin = function _defaultSchemaPlugin(schema) {
   schema.add({
     createdby: {
-      type: elements.ObjectId, ref: 'user', form: {readonly: true, label: 'Created by'}
+      type: elements.ObjectId,
+      ref: 'user',
+      form: {readonly: true, label: 'Created by'}
     },
     lastchangedby: {
-      type: elements.ObjectId, ref: 'user', form: {readonly: true, label: 'Last changed by'}
+      type: elements.ObjectId,
+      ref: 'user',
+      form: {readonly: true, label: 'Last changed by'}
     }
   });
 };
@@ -362,11 +366,10 @@ user.prototype._postApiHandler = function(doc, req, callback) {
  * @param next
  */
 user.prototype.initUser = function(req, res, next) {
-  var self = this;
   if(req.headers.authorization) {
     jwt.verify(req.headers.authorization, molecuel.config.user.secret, function(err, decoded) {
       if(err && !decoded) {
-        console.log("ERROR USER " + err);
+        console.log(err);
         next();
       } else {
         req.user = decoded;
@@ -376,7 +379,8 @@ user.prototype.initUser = function(req, res, next) {
   } else {
     next();
   }
-}
+};
+
 /**
  * Middleware function to check if the user has the correct permissions
  * @param item

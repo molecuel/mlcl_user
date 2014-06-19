@@ -102,8 +102,8 @@ describe('url', function(){
     });
 
     it('should have registered the field references of the user model in page model', function(done) {
-      elements.modelRegistry['page'].schema.paths['lastchangedby._id'].should.be.an.Object;
-      elements.modelRegistry['page'].schema.paths['createdby._id'].should.be.an.Object;
+      elements.modelRegistry['page'].schema.paths['lastchangedby'].should.be.an.Object;
+      elements.modelRegistry['page'].schema.paths['createdby'].should.be.an.Object;
       done();
     });
 
