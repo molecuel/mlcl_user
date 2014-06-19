@@ -131,10 +131,13 @@ var getInstance = function () {
  */
 user.prototype.initApplication = function(app) {
   var self = this;
+
   if(molecuel.config && molecuel.config.user.secret) {
     // Initialize Passport!  Also use passport.session() middleware, to support
     // persistent login sessions (recommended).
     app.use(passport.initialize());
+
+    app.use(self.initUser);
 
     //app.use(passport.session());
     //@todo replace with app.post('/login/jwt',  passport.authenticate('local', { session: false }), function (req, res)
@@ -166,12 +169,10 @@ user.prototype.debugHeader = function debugHeader(req, res, next) {
 user.prototype._defaultSchemaPlugin = function _defaultSchemaPlugin(schema) {
   schema.add({
     createdby: {
-      _id: {type: elements.ObjectId, ref: 'user', form: {hidden: true, label: 'Created by id'}},
-      username: {type: String, form: {hidden: true, label: 'Created by username'}}
+      type: elements.ObjectId, ref: 'user', form: {readonly: true, label: 'Created by'}
     },
     lastchangedby: {
-      _id: {type: elements.ObjectId, ref: 'user', form: {hidden: true, label: 'Last changed by id'}},
-      username: {type: String, form: {hidden: true, label: 'Last changed by username'}}
+      type: elements.ObjectId, ref: 'user', form: {readonly: true, label: 'Last changed by'}
     }
   });
 };
@@ -343,14 +344,39 @@ user.prototype._checkRole = function _checkRole(role, permission) {
 user.prototype._postApiHandler = function(doc, req, callback) {
   //var user = getInstance();
   if(req.user) {
-    doc.createdby = req.user;
-    doc.lastchangedby = req.user;
+    if(!doc.createdby) {
+      doc.createdby = req.user._id; //mongoose creates ObjectIDs Cast errors if object reference is a simple object
+    }
+    doc.lastchangedby = req.user._id;
     callback();
   }  else {
     callback(new Error('No valid user found'));
   }
 };
 
+/**
+ * Middleware function to register the current user on the request
+ * @todo: Is this the right place?
+ * @param req
+ * @param res
+ * @param next
+ */
+user.prototype.initUser = function(req, res, next) {
+  var self = this;
+  if(req.headers.authorization) {
+    jwt.verify(req.headers.authorization, molecuel.config.user.secret, function(err, decoded) {
+      if(err && !decoded) {
+        console.log("ERROR USER " + err);
+        next();
+      } else {
+        req.user = decoded;
+        next();
+      }
+    });
+  } else {
+    next();
+  }
+}
 /**
  * Middleware function to check if the user has the correct permissions
  * @param item
