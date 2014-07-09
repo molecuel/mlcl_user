@@ -369,7 +369,6 @@ user.prototype.initUser = function(req, res, next) {
   if(req.headers.authorization) {
     jwt.verify(req.headers.authorization, molecuel.config.user.secret, function(err, decoded) {
       if(err && !decoded) {
-        console.log(err);
         next();
       } else {
         req.user = decoded;
