@@ -391,7 +391,11 @@ user.prototype.checkPermission = function checkPermission(item, req, res, next) 
   var self = this;
   this.jwt.verify(req.headers.authorization, this.secret, function(err, decoded) {
     if(err && !decoded) {
-      res.send(401);
+      if(err.name === 'TokenExpiredError') {
+        res.send(401, 'Session expired');
+      } else {
+        res.send(401);
+      }
     } else {
       self.model.findOne({_id: decoded._id}, function(err, doc) {
         if(doc && doc.active) {
