@@ -383,14 +383,10 @@ user.prototype._postApiHandler = function(doc, req, callback) {
  * @param next
  */
 user.prototype.checkPermission = function checkPermission(item, req, res, next) {
-  var self = this;
+  var self = getInstance();
   this.jwt.verify(req.headers.authorization, this.secret, function(err, decoded) {
     if(err && !decoded) {
-      if(err.name === 'TokenExpiredError') {
-        res.send(401, 'Session expired');
-      } else {
-        res.send(401);
-      }
+      res.send(401, err);
     } else {
       self.model.findOne({_id: decoded._id}, function(err, doc) {
         if(doc && doc.active) {
