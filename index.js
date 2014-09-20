@@ -123,36 +123,52 @@ var getInstance = function () {
   return instance;
 };
 
+user.prototype.middleware = function middleware(config, app) {
+  if(molecuel.config && molecuel.config.user.secret) {
+    app.use(passport.initialize());
+    app.use(getInstance().initUser);
+    app.post('/login/jwt', passport.authenticate('local', { session: false }), getInstance().userLogin);
+  }
+};
 
 /**
- * Init function for the molecuel module
- * @param app the express app
- * @deprecated
+ * Middleware function to register the current user on the request
+ * @todo: Is this the right place?
+ * @param req
+ * @param res
+ * @param next
  */
-user.prototype.initApplication = function(app) {
-  var self = this;
-
-  if(molecuel.config && molecuel.config.user.secret) {
-    // Initialize Passport!  Also use passport.session() middleware, to support
-    // persistent login sessions (recommended).
-    app.use(passport.initialize());
-
-    app.use(self.initUser);
-
-    //app.use(passport.session());
-    //@todo replace with app.post('/login/jwt',  passport.authenticate('local', { session: false }), function (req, res)
-    //app.post('/login/jwt', function (req, res) {
-    app.post('/login/jwt',  passport.authenticate('local', { session: false }), function (req, res) {
-      // We are sending the profile inside the token
-      var expiresInMinutes = 60*4;
-      // Check if there is a session expiration defined
-      if(molecuel.config.user && molecuel.config.user.session_expiration) {
-        expiresInMinutes = molecuel.config.user.session_expiration;
+user.prototype.initUser = function(req, res, next) {
+  if(req.headers.authorization) {
+    jwt.verify(req.headers.authorization, molecuel.config.user.secret, function(err, decoded) {
+      if(err && !decoded) {
+        next();
+      } else {
+        req.user = decoded;
+        next();
       }
-      var token = jwt.sign(JSON.parse(JSON.stringify(req.user)), self.secret, { expiresInMinutes: expiresInMinutes });
-      res.json({name: user.name, _id: user._id, username: user.username, email: user.email, token: token });
     });
+  } else {
+    next();
   }
+};
+
+/**
+ * userLogin - description
+ *
+ * @param  {type} req description
+ * @param  {type} res description
+ * @return {type}     description
+ */
+user.prototype.userLogin = function userLogin(req, res) {
+  // We are sending the profile inside the token
+  var expiresInMinutes = 60*4;
+  // Check if there is a session expiration defined
+  if(molecuel.config.user && molecuel.config.user.session_expiration) {
+    expiresInMinutes = molecuel.config.user.session_expiration;
+  }
+  var token = jwt.sign(JSON.parse(JSON.stringify(req.user)), molecuel.config.user.secret, { expiresInMinutes: expiresInMinutes });
+  res.json({name: user.name, _id: user._id, username: user.username, email: user.email, token: token });
 };
 
 user.prototype.debugHeader = function debugHeader(req, res, next) {
@@ -358,27 +374,6 @@ user.prototype._postApiHandler = function(doc, req, callback) {
   }
 };
 
-/**
- * Middleware function to register the current user on the request
- * @todo: Is this the right place?
- * @param req
- * @param res
- * @param next
- */
-user.prototype.initUser = function(req, res, next) {
-  if(req.headers.authorization) {
-    jwt.verify(req.headers.authorization, molecuel.config.user.secret, function(err, decoded) {
-      if(err && !decoded) {
-        next();
-      } else {
-        req.user = decoded;
-        next();
-      }
-    });
-  } else {
-    next();
-  }
-};
 
 /**
  * Middleware function to check if the user has the correct permissions
