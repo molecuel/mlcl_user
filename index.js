@@ -30,6 +30,8 @@ var user = function() {
     roles = molecuel.config.user.roles;
   }
 
+  this.passport = passport;
+
   // Definition of the user schema
   this.userSchema =  {
     // Definition of the username
@@ -98,6 +100,7 @@ var user = function() {
   molecuel.on('mlcl::elements::setElementType:post::user', function(module, model) {
     self.model = model;
     self._registerDefaultPassportFunctions(model);
+    molecuel.emit('mlcl::user::init:post', self);
   });
 
   molecuel.once('mlcl::elements::init:post', function(elements) {
