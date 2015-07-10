@@ -219,6 +219,13 @@ user.prototype._registerDefaultschemaFunctions = function(schema) {
           this.salt = bcrypt.genSaltSync(10);
           this.hash = bcrypt.hashSync(this.password, this.salt);
         }
+
+        if(!this.salt) {
+          this.invalidate('salt','must be available for local authentication');
+        }
+        if(!this.hash) {
+          this.invalidate('hash','must be available for local authentication');
+        }
       }
     }
     next();
