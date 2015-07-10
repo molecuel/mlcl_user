@@ -68,9 +68,13 @@ describe('url', function(){
         done();
       });
       molecuel.emit('mlcl::core::init:post', molecuel);
+
     });
 
     it('should initialize search connection', function(done) {
+      // as queue is a new dep for molecuel reindexing we fake the connection here
+      molecuel.emit('mlcl::queue::init:post', {});
+      // call this on successful search connection
       molecuel.once('mlcl::search::connection:success', function(search) {
         searchcon = search;
         search.should.be.a.object;

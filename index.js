@@ -14,7 +14,6 @@ var elements;
  * @constructor
  */
 
-
 var user = function() {
   var self = this;
 
@@ -53,8 +52,8 @@ var user = function() {
     passwordConfirmation: {type: String, form:{ secure: true}},
 
     // password save
-    salt: { type: String, required: true, form: {hidden:true }},
-    hash: { type: String, required: true, form: {hidden: true}},
+    salt: { type: String, required: false, form: {hidden:true }},
+    hash: { type: String, required: false, form: {hidden: true}},
 
     name: {
       first: { type: String, required: false, trim: true },
@@ -203,21 +202,23 @@ user.prototype._defaultSchemaPlugin = function _defaultSchemaPlugin(schema) {
  */
 user.prototype._registerDefaultschemaFunctions = function(schema) {
   schema.pre('validate', function(next) {
-    if (this.password && this.passwordConfirmation) {
-      var invalid = false;
-      if (! elements.validator.isLength(this.password, 6)) {
-        this.invalidate('password', 'must be at least 6 characters.');
-        invalid = true;
-      }
+    if(this.authtype === 'local') {
+      if (this.password && this.passwordConfirmation) {
+        var invalid = false;
+        if (! elements.validator.isLength(this.password, 6)) {
+          this.invalidate('password', 'must be at least 6 characters.');
+          invalid = true;
+        }
 
-      if (this.password !== this.passwordConfirmation) {
-        this.invalidate('passwordConfirmation', 'must match confirmation.');
-        invalid = true;
-      }
+        if (this.password !== this.passwordConfirmation) {
+          this.invalidate('passwordConfirmation', 'must match confirmation.');
+          invalid = true;
+        }
 
-      if(!invalid) {
-        this.salt = bcrypt.genSaltSync(10);
-        this.hash = bcrypt.hashSync(this.password, this.salt);
+        if(!invalid) {
+          this.salt = bcrypt.genSaltSync(10);
+          this.hash = bcrypt.hashSync(this.password, this.salt);
+        }
       }
     }
     next();
@@ -374,7 +375,6 @@ user.prototype._postApiHandler = function(doc, req, callback) {
   }
 };
 
-
 /**
  * Middleware function to check if the user has the correct permissions
  * @param item
@@ -414,11 +414,6 @@ user.prototype.checkPermission = function checkPermission(item, req, res, next) 
     }
   });
 };
-
-/*
- user.prototype.getUserById = function getUserById(id) {
-
- };*/
 
 var init = function (m) {
   // store molecuel instance
