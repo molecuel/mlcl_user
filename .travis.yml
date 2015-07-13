@@ -3,6 +3,4 @@ services:
   - mongodb
   - elasticsearch
 node_js:
-  - "0.10"
-before_script:
-  - sleep 30
+  - "0.12"

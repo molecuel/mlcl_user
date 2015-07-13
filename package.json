@@ -16,8 +16,7 @@
   "dependencies": {
     "passport": ">=0.0.1",
     "passport-local": ">=0.0.1",
-    "jsonwebtoken": ">=0.0.1",
-    "express-jwt": ">=0.0.1",
+    "jsonwebtoken": "^5.0.0",
     "underscore": ">=0.0.1",
     "bcrypt": ">=0.0.1",
     "async": ">=0.0.1"

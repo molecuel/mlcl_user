@@ -97,6 +97,7 @@ var user = function() {
     schemaRegistryEntry.schema.plugin(self._defaultSchemaPlugin);
   });
 
+
   molecuel.on('mlcl::elements::setElementType:post::user', function(module, model) {
     self.model = model;
     self._registerDefaultPassportFunctions(model);
@@ -154,6 +155,22 @@ user.prototype.initUser = function(req, res, next) {
     next();
   }
 };
+
+user.prototype.getTokenFromRequest = function(req) {
+    var expiresInMinutes = 60*4;
+    // Check if there is a session expiration defined
+    if(molecuel.config.user && molecuel.config.user.session_expiration) {
+      expiresInMinutes = molecuel.config.user.session_expiration;
+    }
+    var token = jwt.sign(JSON.parse(JSON.stringify(req.user)), molecuel.config.user.secret, { expiresInMinutes: expiresInMinutes });
+    return token;
+}
+
+user.prototype.getUserObjectFromRequest = function(req) {
+  var token = this.getTokenFromRequest(req);
+  var user = {name: req.user.name, _id: req.user._id, authtype: req.user.authtype, username: req.user.username, email: req.user.email, token: token }
+  return user;
+}
 
 /**
  * userLogin - description
