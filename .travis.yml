@@ -4,3 +4,4 @@ services:
   - elasticsearch
 node_js:
   - "0.12"
+sudo: false
