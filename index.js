@@ -164,13 +164,19 @@ user.prototype.getTokenFromRequest = function(req) {
     }
     var token = jwt.sign(JSON.parse(JSON.stringify(req.user)), molecuel.config.user.secret, { expiresInMinutes: expiresInMinutes });
     return token;
-}
+};
 
 user.prototype.getUserObjectFromRequest = function(req) {
   var token = this.getTokenFromRequest(req);
-  var user = {name: req.user.name, _id: req.user._id, authtype: req.user.authtype, username: req.user.username, email: req.user.email, token: token }
+  var user = {
+    name: req.user.name,
+    _id: req.user._id,
+    authtype: req.user.authtype,
+    username: req.user.username,
+    email: req.user.email, token: token
+  };
   return user;
-}
+};
 
 /**
  * userLogin - description
