@@ -380,6 +380,9 @@ user.prototype._getRoles = function _getRoles() {
   if(molecuel.config && molecuel.config.user && molecuel.config.user.roles) {
     roles = molecuel.config.user.roles;
   }
+  if(_.indexOf(roles, 'authenticated') === -1) {
+    roles.push('authenticated');
+  }
   return roles;
 };
 
@@ -430,6 +433,9 @@ user.prototype.checkPermission = function checkPermission(item, req, res, next) 
     } else {
       self.model.findOne({_id: decoded._id}, function(err, doc) {
         if(doc && doc.active) {
+          if(_.indexOf(doc.roles, 'authenticated') === -1) {
+            doc.roles.push('authenticated');
+          }
           // set user object to request object
           req.user = decoded;
           var permission = item.permission;
