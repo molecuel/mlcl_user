@@ -1,4 +1,4 @@
-var _ = require('underscore');
+var _ = require('lodash');
 var bcrypt = require('bcrypt');
 var passport = require('passport');
 var LocalStrategy = require('passport-local').Strategy;
@@ -28,6 +28,10 @@ var user = function() {
   // check if there are roles defined by the configuration of the current project
   if(molecuel.config && molecuel.config.user && molecuel.config.user.roles) {
     roles = molecuel.config.user.roles;
+  }
+
+  if(_.indexOf(roles, 'authenticated') === -1) {
+    roles.push('authenticated');
   }
 
   this.passport = passport;
@@ -354,6 +358,9 @@ user.prototype._registerDefaultPassportFunctions = function _registerDefaultPass
       if (!user) {
         return done(null, false, { message: 'Incorrect username.' });
       } else {
+        if(_.indexOf(user.roles, 'authenticated') === -1) {
+          user.roles.push('authenticated');
+        }
         return done(null, user);
       }
     });
