@@ -148,8 +148,10 @@ user.prototype.middleware = function middleware(config, app) {
 user.prototype.initUser = function(req, res, next) {
   if(req.headers.authorization) {
     jwt.verify(req.headers.authorization, molecuel.config.user.secret, function(err, decoded) {
-      if(err && !decoded) {
-        next();
+      if(err && err.name === 'TokenExpiredError') {
+        res.status(401).send(err);
+      } else if(err && !decoded) {
+        next(err);
       } else {
         req.user = decoded;
         next();
