@@ -168,7 +168,10 @@ user.prototype.getTokenFromRequest = function(req) {
     if(molecuel.config.user && molecuel.config.user.session_expiration) {
       expiresInMinutes = molecuel.config.user.session_expiration;
     }
-    var token = jwt.sign(JSON.parse(JSON.stringify(req.user)), molecuel.config.user.secret, { expiresInMinutes: expiresInMinutes });
+    var signobj = {
+      _id: req.user._id
+    };
+    var token = jwt.sign(JSON.parse(JSON.stringify(signobj)), molecuel.config.user.secret, { expiresInMinutes: expiresInMinutes });
     return token;
 };
 
@@ -199,7 +202,25 @@ user.prototype.userLogin = function userLogin(req, res) {
     expiresInMinutes = molecuel.config.user.session_expiration;
   }
   var token = jwt.sign(JSON.parse(JSON.stringify(req.user)), molecuel.config.user.secret, { expiresInMinutes: expiresInMinutes });
-  res.json({name: user.name, _id: user._id, username: user.username, email: user.email, token: token });
+  var authObject = {
+    name: req.user.name,
+    _id: req.user._id,
+    username: req.user.username,
+    email: req.user.email,
+    token: token
+  };
+
+  if(molecuel.config.user && molecuel.config.user.tokenfields) {
+    async.each(molecuel.config.user.tokenfields, function(field, cb) {
+      var fieldVal = _.get(req.user, field);
+      _.set(authObject, field, fieldVal);
+      cb();
+    }, function() {
+      res.json(authObject);
+    });
+  } else {
+    res.json(authObject);
+  }
 };
 
 user.prototype.debugHeader = function debugHeader(req, res, next) {
