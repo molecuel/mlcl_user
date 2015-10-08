@@ -326,15 +326,13 @@ user.prototype._registerDefaultschemaFunctions = function(schema) {
             return callback(null, false, {message: 'Wrong password'});
           });
         } else {
-          var conditions = {_id: user._id},
-            update = {$inc: {visits: 1}, $set: {lastlogin: new Date()}},
-            options = {multi: false};
-
-          self.update(conditions, update, options, function(err) {
-            if(!err) {
-              return callback(null, user);
+          user.visits+1;
+          user.lastlogin = new Date();
+          user.save(function(err, doc) {
+            if(err) {
+              return callback(err, false);
             } else {
-              return callback(null, false, {message: 'Error while updating user information'});
+              return callback(null, doc);
             }
           });
         }
