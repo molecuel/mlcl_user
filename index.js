@@ -41,8 +41,7 @@ var user = function() {
     // Definition of the username
     username: { type: String, list: true, required: true, trim: true, unique: true, index: true },
     // Define the email address
-    email: { type: String, list: true, trim: true, lowercase: true, required: true},
-
+    email: { type: String, list: true, trim: true, lowercase: true, required: false},
     // save the date and time of the last login
     lastlogin: { type: Date, 'default': Date.now, form: {readonly: true}},
     // save date and time of the last logon error
