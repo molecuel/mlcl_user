@@ -215,11 +215,11 @@ user.prototype.userLogin = function userLogin(req, res) {
       _.set(authObject, field, fieldVal);
       cb();
     }, function() {
-      molecuel.log.info('mlcl_user', 'authenticated', {username: authObject.name, _id: authObject._id});
+      molecuel.log.info('mlcl_user', 'authenticated', {username: authObject.username, name: authObject.name, _id: authObject._id});
       res.json(authObject);
     });
   } else {
-    molecuel.log.info('mlcl_user', 'authenticated', {username: authObject.name, _id: authObject._id});
+    molecuel.log.info('mlcl_user', 'authenticated', {username: authObject.username, ame: authObject.name, _id: authObject._id});
     res.json(authObject);
   }
 };
