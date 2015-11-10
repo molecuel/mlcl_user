@@ -170,7 +170,7 @@ user.prototype.getTokenFromRequest = function(req) {
     var signobj = {
       _id: req.user._id
     };
-    var token = jwt.sign(JSON.parse(JSON.stringify(signobj)), molecuel.config.user.secret, { expiresInMinutes: expiresInMinutes });
+    var token = jwt.sign(JSON.parse(JSON.stringify(signobj)), molecuel.config.user.secret, { expiresIn: expiresInMinutes*60 });
     return token;
 };
 
@@ -215,9 +215,11 @@ user.prototype.userLogin = function userLogin(req, res) {
       _.set(authObject, field, fieldVal);
       cb();
     }, function() {
+      molecuel.log.info('mlcl_user', 'authenticated', {username: authObject.name, _id: authObject._id});
       res.json(authObject);
     });
   } else {
+    molecuel.log.info('mlcl_user', 'authenticated', {username: authObject.name, _id: authObject._id});
     res.json(authObject);
   }
 };
@@ -316,7 +318,6 @@ user.prototype._registerDefaultschemaFunctions = function(schema) {
         if (err) {
           return callback(err);
         }
-
         if (!passwordCorrect) {
           var cond = {_id: user._id},
             upd = {$set: {lasterror: new Date()}},
