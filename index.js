@@ -161,6 +161,11 @@ user.prototype.initUser = function(req, res, next) {
   }
 };
 
+/**
+ * Generate token
+ * @param  {[type]} req [description]
+ * @return {[type]}     [description]
+ */
 user.prototype.getTokenFromRequest = function(req) {
     var expiresInMinutes = 60*4;
     // Check if there is a session expiration defined
@@ -171,9 +176,16 @@ user.prototype.getTokenFromRequest = function(req) {
       _id: req.user._id
     };
     var token = jwt.sign(JSON.parse(JSON.stringify(signobj)), molecuel.config.user.secret, { expiresIn: expiresInMinutes*60 });
+    molecuel.log.debug('mlcl_user', 'getTokenFromRequest', {userid: req.user._id});
     return token;
 };
 
+/**
+ * Get the post data from a post request
+ * Needed for authentications like saml2
+ * @param  {[type]} req [description]
+ * @return {[type]}     [description]
+ */
 user.prototype.getUserObjectFromRequest = function(req) {
   var token = this.getTokenFromRequest(req);
   var user = {
@@ -183,6 +195,7 @@ user.prototype.getUserObjectFromRequest = function(req) {
     username: req.user.username,
     email: req.user.email, token: token
   };
+  molecuel.log.debug('mlcl_user', 'getUserObjectFromRequest', user);
   return user;
 };
 
@@ -200,7 +213,7 @@ user.prototype.userLogin = function userLogin(req, res) {
   if(molecuel.config.user && molecuel.config.user.session_expiration) {
     expiresInMinutes = molecuel.config.user.session_expiration;
   }
-  var token = jwt.sign(JSON.parse(JSON.stringify(req.user)), molecuel.config.user.secret, { expiresInMinutes: expiresInMinutes });
+  var token = jwt.sign(JSON.parse(JSON.stringify(req.user._id)), molecuel.config.user.secret, { expiresIn: expiresInMinutes*60 });
   var authObject = {
     name: req.user.name,
     _id: req.user._id,
@@ -215,11 +228,11 @@ user.prototype.userLogin = function userLogin(req, res) {
       _.set(authObject, field, fieldVal);
       cb();
     }, function() {
-      molecuel.log.info('mlcl_user', 'authenticated', {username: authObject.username, name: authObject.name, _id: authObject._id});
+      molecuel.log.info('mlcl_user', 'authenticated', {username: authObject.name, _id: authObject._id, method: 'local'});
       res.json(authObject);
     });
   } else {
-    molecuel.log.info('mlcl_user', 'authenticated', {username: authObject.username, ame: authObject.name, _id: authObject._id});
+    molecuel.log.info('mlcl_user', 'authenticated', {username: authObject.name, _id: authObject._id, method: 'local'});
     res.json(authObject);
   }
 };
