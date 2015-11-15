@@ -213,7 +213,7 @@ user.prototype.userLogin = function userLogin(req, res) {
   if(molecuel.config.user && molecuel.config.user.session_expiration) {
     expiresInMinutes = molecuel.config.user.session_expiration;
   }
-  var token = jwt.sign(JSON.parse(JSON.stringify(req.user._id)), molecuel.config.user.secret, { expiresIn: expiresInMinutes*60 });
+  var token = jwt.sign(JSON.parse(JSON.stringify(req.user)), molecuel.config.user.secret, { expiresIn: expiresInMinutes*60 });
   var authObject = {
     name: req.user.name,
     _id: req.user._id,
