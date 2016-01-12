@@ -176,7 +176,7 @@ user.prototype.getTokenFromRequest = function(req) {
       _id: req.user._id
     };
     var token = jwt.sign(JSON.parse(JSON.stringify(signobj)), molecuel.config.user.secret, { expiresIn: expiresInMinutes*60 });
-    molecuel.log.debug('mlcl_user', 'getTokenFromRequest', {userid: req.user._id});
+    //molecuel.log.debug('mlcl_user', 'getTokenFromRequest', {userid: req.user._id});
     return token;
 };
 
@@ -195,7 +195,7 @@ user.prototype.getUserObjectFromRequest = function(req) {
     username: req.user.username,
     email: req.user.email, token: token
   };
-  molecuel.log.debug('mlcl_user', 'getUserObjectFromRequest', user);
+  //molecuel.log.debug('mlcl_user', 'getUserObjectFromRequest', user);
   return user;
 };
 
