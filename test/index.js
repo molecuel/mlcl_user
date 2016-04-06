@@ -5,10 +5,12 @@ var assert = require('assert'),
   user = require('../'),
   util = require('util'),
   EventEmitter = require('events').EventEmitter,
-  should = require('should'),
   mlcl_database = require('mlcl_database'),
   mlcl_elastic = require('mlcl_elastic'),
   mlcl_elements = require('mlcl_elements');
+
+require('should');
+
 
 describe('url', function(){
   //var mytestobject;

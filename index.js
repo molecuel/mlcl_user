@@ -213,12 +213,13 @@ user.prototype.userLogin = function userLogin(req, res) {
   if(molecuel.config.user && molecuel.config.user.session_expiration) {
     expiresInMinutes = molecuel.config.user.session_expiration;
   }
-  var token = jwt.sign(JSON.parse(JSON.stringify(req.user)), molecuel.config.user.secret, { expiresIn: expiresInMinutes*60 });
+  var userobject = JSON.parse(JSON.stringify(req.user));
+  var token = jwt.sign(userobject, molecuel.config.user.secret, { expiresIn: expiresInMinutes*60 });
   var authObject = {
-    name: req.user.name,
-    _id: req.user._id,
-    username: req.user.username,
-    email: req.user.email,
+    _id: userobject._id,
+    name: userobject.name,
+    username: userobject.username,
+    email: userobject.email,
     token: token
   };
 
@@ -229,12 +230,12 @@ user.prototype.userLogin = function userLogin(req, res) {
       cb();
     }, function() {
       molecuel.log.info('mlcl_user', 'authenticated',
-        {username: authObject.username, name: authObject.name, _id: authObject._id, method: 'local'});
+        {username: authObject.username, name: userobject.name, _id: authObject._id, method: 'local'});
       res.json(authObject);
     });
   } else {
     molecuel.log.info('mlcl_user', 'authenticated',
-      {username: authObject.username,  name: authObject.name, _id: authObject._id, method: 'local'});
+      {username: authObject.username, name: userobject.name, _id: authObject._id, method: 'local'});
     res.json(authObject);
   }
 };
