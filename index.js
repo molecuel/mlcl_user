@@ -186,17 +186,32 @@ user.prototype.getTokenFromRequest = function(req) {
  * @param  {[type]} req [description]
  * @return {[type]}     [description]
  */
-user.prototype.getUserObjectFromRequest = function(req) {
+user.prototype.getUserObjectFromRequest = function(req, callback) {
   var token = this.getTokenFromRequest(req);
-  var user = {
-    name: req.user.name,
-    _id: req.user._id,
-    authtype: req.user.authtype,
-    username: req.user.username,
-    email: req.user.email, token: token
+  var userobject = req.user;
+  var authObject = {
+    _id: userobject._id,
+    name: userobject.name,
+    username: userobject.username,
+    email: userobject.email,
+    token: token
   };
-  //molecuel.log.debug('mlcl_user', 'getUserObjectFromRequest', user);
-  return user;
+  // checking if there is a callback for backward compatibility
+  if(callback) {
+    if(molecuel.config.user && molecuel.config.user.tokenfields) {
+      async.each(molecuel.config.user.tokenfields, function(field, cb) {
+        var fieldVal = _.get(req.user, field);
+        _.set(authObject, field, fieldVal);
+        cb();
+      }, function() {
+        callback(null, authObject);
+      });
+    } else {
+      callback(null, authObject);
+    }
+  } else {
+    return authObject;
+  }
 };
 
 /**
@@ -214,7 +229,10 @@ user.prototype.userLogin = function userLogin(req, res) {
     expiresInMinutes = molecuel.config.user.session_expiration;
   }
   var userobject = JSON.parse(JSON.stringify(req.user));
-  var token = jwt.sign(userobject, molecuel.config.user.secret, { expiresIn: expiresInMinutes*60 });
+  var signobj = {
+    _id: userobject._id
+  };
+  var token = jwt.sign(JSON.parse(JSON.stringify(signobj)), molecuel.config.user.secret, { expiresIn: expiresInMinutes*60 });
   var authObject = {
     _id: userobject._id,
     name: userobject.name,
@@ -238,6 +256,7 @@ user.prototype.userLogin = function userLogin(req, res) {
       {username: authObject.username, name: userobject.name, _id: authObject._id, method: 'local'});
     res.json(authObject);
   }
+
 };
 
 user.prototype.debugHeader = function debugHeader(req, res, next) {
