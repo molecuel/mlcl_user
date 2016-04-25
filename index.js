@@ -83,7 +83,7 @@ var user = function() {
     var schemaDefinition = {
       schemaName: 'user',
       schema: self.userSchema,
-      options: {indexable: true, avoidTranslate: true, avoidUrl: true}
+      options: {indexable: false, avoidTranslate: true, avoidUrl: true}
     };
     elements.registerSchemaDefinition(schemaDefinition);
   });
