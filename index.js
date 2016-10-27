@@ -214,6 +214,16 @@ user.prototype.getUserObjectFromRequest = function(req, callback) {
   }
 };
 
+user.prototype.requestUserObject = function(req, res) {
+  this.getUserObjectFromRequest(req, function(err, authObject) {
+    if(authObject && authObject._id) {
+      res.send(authObject);
+    } else {
+      res.status(401).send();
+    }
+  });
+}
+
 /**
  * userLogin - description
  *
