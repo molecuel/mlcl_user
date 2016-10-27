@@ -197,31 +197,26 @@ user.prototype.getUserObjectFromRequest = function(req, callback) {
     token: token
   };
   // checking if there is a callback for backward compatibility
-  if(callback) {
-    if(molecuel.config.user && molecuel.config.user.tokenfields) {
-      async.each(molecuel.config.user.tokenfields, function(field, cb) {
-        var fieldVal = _.get(req.user, field);
-        _.set(authObject, field, fieldVal);
-        cb();
-      }, function() {
-        callback(null, authObject);
-      });
-    } else {
-      callback(null, authObject);
-    }
+  if(molecuel.config.user && molecuel.config.user.tokenfields) {
+    _.each(molecuel.config.user.tokenfields, function(field) {
+      var fieldVal = _.get(req.user, field);
+      _.set(authObject, field, fieldVal);
+    })
+  }
+  if(!callback) {
+      return authObject;
   } else {
-    return authObject;
+    callback(null, authObject);
   }
 };
 
 user.prototype.requestUserObject = function(req, res) {
-  this.getUserObjectFromRequest(req, function(err, authObject) {
-    if(authObject && authObject._id) {
-      res.send(authObject);
-    } else {
-      res.status(401).send();
-    }
-  });
+  var authObject = this.getUserObjectFromRequest(req);
+  if(authObject && authObject._id) {
+    res.send(authObject);
+  } else {
+    res.status(401).send();
+  }
 }
 
 /**
@@ -503,7 +498,7 @@ user.prototype.checkPermission = function checkPermission(item, req, res, next) 
             doc.roles.push('authenticated');
           }
           // set user object to request object
-          req.user = decoded;
+          req.user = doc;
           var permission = item.permission;
           var detectPermission = function(role, callback) {
             if(self._checkRole(role, permission)) {
